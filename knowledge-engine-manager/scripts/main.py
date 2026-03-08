@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+"""知识引擎管理主脚本
+
+该脚本是知识引擎管理器的入口点，支持以下操作：
+1. install: 安装知识引擎
+2. update: 更新知识引擎
+
+使用方法：
+    python main.py install [--root <project_root>]
+    python main.py update [--root <project_root>]
+
+功能流程：
+1. 检查并创建目录结构
+2. 部署模板文件
+3. 检查技术栈文件
+4. 管理 Git 子模块
+5. 安装项目依赖
+"""
+
 import os
 import sys
 import argparse
@@ -8,6 +27,10 @@ import dependency_manager
 
 @handle_exception
 def main():
+    """主函数
+    
+    解析命令行参数并执行相应的操作
+    """
     parser = argparse.ArgumentParser(description="Knowledge Engine Manager")
     parser.add_argument("action", choices=["install", "update"], help="Action to perform")
     parser.add_argument("--root", default=os.getcwd(), help="Project root directory")
@@ -49,8 +72,10 @@ def main():
         log_message("Skipping Git operations (not a git repo).", "WARNING")
     else:
         if args.action == "install":
+            # 安装子模块
             git_manager.install_submodule(root_dir)
         elif args.action == "update":
+            # 检查是否有未提交更改
             if git_manager.check_dirty(root_dir):
                 # 输出特定标记供 Agent 识别
                 print("DIRTY_STATE_DETECTED")
@@ -58,6 +83,7 @@ def main():
                 log_message("Local changes detected in .trae/skills. Please commit or discard them.", "WARNING")
                 return
             
+            # 同步子模块
             git_manager.sync_submodule(root_dir)
             
     # 4. 依赖管理
