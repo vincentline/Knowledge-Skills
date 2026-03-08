@@ -34,7 +34,7 @@ version: 2.0.0
 
 ### 3. 自动提交与推送 (Auto-Commit & Push)
 当检查通过（或补录完成）后：
-- **同步远程 (Sync)**: 执行 `git pull` 以确保本地代码与远程同步，避免冲突。
+- **同步远程 (Sync)**: **必须**执行 `git pull` 以确保本地代码与远程同步，避免冲突。
 - **读取模板**: 读取 `.trae/skills/integrity-check/templates/commit_message.md`。
 - **生成消息**: 
     - 根据 `git diff` 摘要和 Inbox 笔记内容，填充模板。
