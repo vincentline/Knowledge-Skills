@@ -1,6 +1,6 @@
-# 知识引擎使用帮助与目录指南 (HELP.md)
+# Knowledge-Skills 项目指南
 
-欢迎使用 知识引擎！本文档旨在帮助你快速了解项目结构、各目录功能以及如何使用本项目的知识引擎。
+欢迎使用 Knowledge-Skills 项目！本文档旨在帮助你快速了解项目结构、各目录功能以及如何使用本项目的知识引擎。
 
 ## 1. 核心目录结构说明
 
@@ -8,31 +8,20 @@
 | :--- | :--- | :--- |
 | **`.trae/`** | **Trae 配置与知识库** | **项目的“大脑”**。存放 AI 配置、知识库规则、技能包和设计文档。 |
 | ├── `rules/` | 规则库 | 存放项目的技术规范、代码风格和模块文档。AI 写代码前会查阅这里。 |
-| ├── `skills/` | 技能包 | 存放 AI 的能力扩展 (如 `coder`, `knowledge-gardener`)。 |
+| ├── `skills/` | 技能包 | 存放 AI 的能力扩展 (如 `coder`, `knowledge-gardener`, `knowledge-librarian` 等)。 |
 | ├── `specs/` | 设计规范 | 存放功能开发的设计文档 (Spec, Tasks, Checklist)。 |
-| └── `documents/` | 项目文档 | 存放项目产生的各类技术文档和架构建议书。 |
-| **`src/`** | **源代码目录** | **项目的“躯干”**。存放所有前端代码、静态资源和业务逻辑。 |
-| ├── `assets/` | 静态资源 | 图片、CSS 样式表、演示用的 SVGA/PNG 素材。 |
-| ├── `js/` | JavaScript 源码 | 核心逻辑代码。 |
-| │   ├── `core/` | 核心模块 | 画布引擎 (Konva)、编辑器核心逻辑。 |
-| │   ├── `service/` | 服务模块 | 媒体处理 (FFmpeg)、格式转换 (GIF/MP4)、文件导出。 |
-| │   ├── `components/` | UI 组件 | 右侧面板、弹窗等 Vue 组件逻辑。 |
-| │   ├── `mixins/` | 混入逻辑 | Vue Mixins (如 `panel-mixin.js` 用于面板管理)。 |
-| │   └── `lib/` | 第三方库 | 存放本地化的依赖库 (ffmpeg.wasm, svga.min.js 等)。 |
-| └── `gadgets/` | 小工具 | 独立的小工具页面 (如 PNG 压缩、乱码修复)。 |
-| **`ai_protocol_hub/`** | **AI 协议中心** | (旧版/保留) 存放早期的 AI 协作规则和脚本，部分已被 `.trae/rules` 取代。 |
-| **`docs/`** | **文档/构建产物** | 通常用于 GitHub Pages 部署的静态文件输出目录。 |
+| ├── `documents/` | 项目文档 | 存放项目产生的各类技术文档和架构建议书。 |
+| ├── `logs/` | 日志目录 | 存放更新日志、错误日志和决策日志。 |
+| ├── `temp/` | 临时目录 | 存放临时文件。 |
+| └── `trash/` | 回收站 | 存放待删除的文件。 |
 
 ## 2. 根目录关键文件说明
 
 | 文件名 | 用途 |
 | :--- | :--- |
-| `README.md` | 项目主页，介绍项目背景、安装和启动方法。 |
-| `HELP.md` | **(本文档)** 项目目录结构与使用指南。 |
-| `INDEX.md` | 项目功能索引，帮助 AI 快速定位代码位置。 |
+| `README.md` | 项目主页，介绍项目背景、安装和使用方法。 |
 | `.trae/logs/UPDATE_LOG.md` | **变更日志**。记录每次代码修改的内容，AI 会自动维护。 |
-| `CODE_STYLE.md` | 原始代码风格指南 (已被 `.trae/rules/core/coding-style.ts.md` 增强)。 |
-| `package.json` | npm 包管理文件，定义了项目依赖和构建脚本。 |
+| `package.json` | npm 包管理文件，定义了项目依赖和构建脚本（如果适用）。 |
 
 ## 3. 知识引擎原理与机制
 
@@ -49,7 +38,7 @@
     *   特点：写入快，未整理，碎片化。
 3.  **大脑皮层 (Cortex)** -> **Rules (`.trae/rules/modules/`)**
     *   **长期记忆区**。存放经过验证、结构化的项目规范。
-    *   **Index Pattern**: 采用原子文件 (`core.ts.md`) + 目录索引 (`index.ts.md`) 的结构，避免大文件臃肿。
+    *   **Index Pattern**: 采用原子文件 + 目录索引的结构，避免大文件臃肿。
     *   特点：读取快，结构严谨，永久有效。
 
 ### 3.2 运作机制：闭环进化
@@ -68,6 +57,9 @@
 | **`knowledge-gardener`** | **速记员** | **海马体 (感知)** | **记笔记的**。你随口说的经验、踩过的坑，它立马记在便利贴 (Inbox) 上，不让灵感溜走。 |
 | **`knowledge-librarian`** | **图书管理员** | **睡眠整理 (内化)** | **整理书架的**。趁你休息时，把便利贴批量归档 (Batch Merge)，并把厚书拆分成小册子 (Split)，把没用的扔掉。 |
 | **`integrity-check`** | **质检员** | **免疫系统 (防御)** | **守大门的**。提交代码前主动扫描变更，自动生成规范的 Commit Message。**兼任发布员**，负责一键发版 (Release)。 |
+| **`knowledge-doctor`** | **医生** | **诊断与治疗** | **检查健康的**。扫描 Rules 模块，诊断格式、正确性、去重、拆分等问题，并进行治疗。 |
+| **`skill-creator`** | **技能创建者** | **能力扩展** | **创建新技能的**。帮助初始化、打包和验证新技能。 |
+| **`webapp-testing`** | **测试工程师** | **质量保证** | **测试 Web 应用的**。使用 Playwright 测试前端功能，调试 UI 行为，捕获浏览器截图和日志。 |
 
 ### 3.4 知识引擎运转全流程 (The Flow)
 
@@ -78,6 +70,7 @@ graph TD
     KG[Gardener 速记员]
     IC[Integrity-Check 质检员]
     KL[Librarian 图书管理员]
+    KD[Doctor 医生]
     
     Inbox[(Inbox 海马体)]
     Rules[(Rules 大脑皮层)]
@@ -89,7 +82,8 @@ graph TD
     User -->|2. 总结经验| KG
     User -->|3. 提交代码| IC
     User -->|4. 整理归档| KL
-    User -->|5. 一键发版| IC
+    User -->|5. 检查健康| KD
+    User -->|6. 一键发版| IC
 
     %% 写入流
     KG -->|生成碎片| Inbox
@@ -105,6 +99,7 @@ graph TD
     KL -->|清空| Inbox
     
     %% 检查流
+    KD -->|诊断治疗| Rules
     IC -->|扫描变更| Git
     IC -->|检查覆盖率| Inbox
     
@@ -112,39 +107,6 @@ graph TD
     IC -->|合并版本号| GH
     GH -->|自动发版| User
 ```
-
-#### 环节详解
-
-1.  **输入环节 (Input)**
-    *   **负责人**: **Gardener (速记员)**
-    *   **触发条件**: 用户主动总结经验，或 Integrity-Check 发现漏记。
-    *   **执行标准**: 
-        *   **预切分**: 一个文件只讲一件事。
-        *   **选模板**: 修 Bug 用 `inbox_note`，学知识用 `inbox_knowledge`。
-    *   **产物**: Inbox 中的碎片文件 (`.md`)。
-
-2.  **验证与发布环节 (Verify & Release)**
-    *   **负责人**: **Integrity-Check (质检员)**
-    *   **触发条件**: 用户执行 `git commit` 或请求发版。
-    *   **执行标准**:
-        *   **Commit**: 严格遵循 Conventional Commits (`feat`, `fix`)。
-        *   **Release**: 调用 `release.py` 自动合并 Release PR。
-    *   **产物**: 规范的 Commit Message，GitHub Release Tag。
-
-3.  **归档环节 (Archiving)**
-    *   **负责人**: **Librarian (图书管理员)**
-    *   **触发条件**: 系统空闲时或用户主动请求。
-    *   **执行标准**:
-        *   **批量处理**: 使用 `batch-merge` 提升效率。
-        *   **大文件治理**: 对 >300 行文件执行物理拆分 (Index Pattern)。
-        *   **分级实证**: 核心规则必须查阅代码库验证真伪。
-    *   **产物**: Rules 中的结构化文档 (`index.ts.md` + 子文件)。
-
-### 3.5 为什么需要它？
-
-*   **解决“AI 健忘”**：普通 AI 聊完就忘，知识引擎让它拥有“项目记忆”。
-*   **保证一致性**：无论你隔多久再开发，AI 都会遵守同一套代码风格。
-*   **经验复用**：以前踩过的坑，通过自动归档，以后永远不会再踩。
 
 ## 4. 如何使用 AI 知识引擎
 
@@ -157,7 +119,7 @@ graph TD
 
 ### 场景 B：我想总结经验 / 记录 Bug
 **指令**：`/skill knowledge-gardener [你的总结]`
-*   **示例**：“/skill knowledge-gardener 刚才解决的那个 FFmpeg 内存泄漏问题，把解决方法记录下来。”
+*   **示例**：“/skill knowledge-gardener 刚才解决的那个内存泄漏问题，把解决方法记录下来。”
 *   **AI 动作**：快速提取经验，生成一个碎片文件暂存到 **Inbox** (海马体)，不打断你的开发心流。
 
 ### 场景 C：提交代码前检查
@@ -172,18 +134,34 @@ graph TD
 *   **示例**：“/skill knowledge-librarian 整理一下这周的 Inbox。”
 *   **AI 动作**：像图书管理员一样，把 Inbox 里的碎片文件批量归档 (Batch Merge) 进长期规则库 (Rules)，并对大文件进行拆分治理，最后清空 Inbox。建议每周运行一次。
 
-### 场景 E：发布新版本
-**指令**：`帮我发版` 或 `合并版本号`
-*   **AI 动作**：调用 `release.py` 脚本，自动查找并合并 GitHub 上的 Release PR，触发自动化发版流程。
+### 场景 E：检查知识库健康
+**指令**：`/skill knowledge-doctor`
+*   **示例**：“/skill knowledge-doctor 检查一下 Rules 模块的健康状况。”
+*   **AI 动作**：扫描 Rules 模块，诊断格式、正确性、去重、拆分等问题，并进行治疗，确保知识库的健康状态。
+
+### 场景 F：创建新技能
+**指令**：`/skill skill-creator [技能名称]`
+*   **示例**：“/skill skill-creator 创建一个新的测试技能。”
+*   **AI 动作**：帮助初始化、打包和验证新技能，扩展知识引擎的能力。
+
+### 场景 G：测试 Web 应用
+**指令**：`/skill webapp-testing [测试需求]`
+*   **示例**：“/skill webapp-testing 测试一下登录功能是否正常。”
+*   **AI 动作**：使用 Playwright 测试前端功能，调试 UI 行为，捕获浏览器截图和日志。
+
+### 场景 H：安装和更新知识引擎
+**指令**：`/skill knowledge-engine-manager`
+*   **示例**：“/skill knowledge-engine-manager 安装知识引擎。”
+*   **AI 动作**：检查目录结构，安装或更新知识引擎，管理依赖，确保知识引擎的完整性和稳定性。
 
 ## 5. 常见问题 (Q&A)
 
 *   **Q: 我看不懂代码，怎么知道文件放哪了？**
-    *   A: 直接问 AI：“xxx 功能的代码在哪里？” 它会查阅 `INDEX.md` 告诉你。
+    *   A: 直接问 AI：“xxx 功能的代码在哪里？” 它会查阅相关文档告诉你。
 *   **Q: `.trae` 目录下的文件我可以删吗？**
     *   A: **最好不要删**。那是 AI 的记忆库，删了它就变“笨”了。
-*   **Q: `src/js/lib/` 里的文件是干嘛的？**
-    *   A: 那些是第三方工具库（比如处理视频的 FFmpeg，画图的 Konva），通常不需要修改。
+*   **Q: 如何更新知识引擎？**
+    *   A: 使用 `/skill knowledge-engine-manager` 指令，它会自动检查更新并执行相应操作。
 
 ---
-*文档更新时间：2026-03-07*
+*文档更新时间：2026-03-09*

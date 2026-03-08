@@ -28,8 +28,7 @@ import json
     - 标准库 (argparse, os, datetime, sys, json)
     - 无需 pip 安装额外依赖 (已移除 pytz)
 
-作者: MeeWoo Team
-更新日期: 2026-03-07
+ 
 """
 
 # ==========================================

@@ -1,4 +1,7 @@
-# 变更日志 (Change Log)
+## 更新日志 (UPDATE_LOG)
 
-> 本文档由 `coder` 技能自动维护，记录项目的所有变更历史。
-> 格式：`[YYYY-MM-DD HH:MM:SS] 【<ActionType>】 : <RelativePath> - <Description>`
+> 本日志由 Coder Skill 自动维护，禁止手动编辑。
+> 详细规则请参阅 [.trae/rules/core/workflows.ts.md](../rules/core/workflows.ts.md)
+
+## 记录列表
+<!-- 在下方添加新条目 -->
