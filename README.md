@@ -151,10 +151,29 @@ graph TD
 
 ### 场景 H：安装和更新知识引擎
 **指令**：`/skill knowledge-engine-manager`
-*   **示例**：“/skill knowledge-engine-manager 安装知识引擎。”
+*   **示例**："/skill knowledge-engine-manager 安装知识引擎。"
 *   **AI 动作**：检查目录结构，安装或更新知识引擎，管理依赖，确保知识引擎的完整性和稳定性。
 
-## 5. 常见问题 (Q&A)
+### 场景 I：版本管理和发布
+**指令**：`/skill integrity-check`
+*   **示例**："/skill integrity-check 帮我发布版本。"
+*   **AI 动作**：检查代码变更的 Inbox 覆盖率，确保所有重要变更都有记录，生成符合规范的版本发布信息，协助完成版本管理和发布流程。
+
+## 5. 快速参考
+
+| 场景 | 技能名称 | 触发指令 | 自然语言触发 |
+| :--- | :--- | :--- | :--- |
+| **写代码/改 Bug** | coder | `/skill coder [需求]` | "帮我写代码"、"修复这个 Bug"、"优化性能" |
+| **记录经验/笔记** | knowledge-gardener | `/skill knowledge-gardener [总结]` | "记录经验"、"保存到 inbox"、"生成笔记"、总结经验 |
+| **提交代码检查** | integrity-check | `/skill integrity-check` | "帮我提交代码"、"检查代码"、"帮我提交推送代码" |
+| **整理知识库** | knowledge-librarian | `/skill knowledge-librarian` | "整理 Inbox"、"归档知识" |
+| **检查知识库健康** | knowledge-doctor | `/skill knowledge-doctor` | "检查知识库健康"、"诊断 Rules" |
+| **创建新技能** | skill-creator | `/skill skill-creator [技能名称]` | "创建新技能"、"打包技能" |
+| **测试 Web 应用** | webapp-testing | `/skill webapp-testing [测试需求]` | "测试登录功能"、"调试 UI 行为" |
+| **版本管理/发布** | integrity-check | `/skill integrity-check` | "帮我发布版本"、"版本管理"、"一键发版" |
+| **安装/更新知识引擎** | knowledge-engine-manager | `/skill knowledge-engine-manager [操作]` | "安装知识引擎"、"更新知识库"、"重新安装知识库" |
+
+## 6. 常见问题 (Q&A)
 
 *   **Q: 我看不懂代码，怎么知道文件放哪了？**
     *   A: 直接问 AI：“xxx 功能的代码在哪里？” 它会查阅相关文档告诉你。
