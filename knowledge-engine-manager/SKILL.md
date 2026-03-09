@@ -1,12 +1,12 @@
-# 知识引擎管理器 (Knowledge Engine Manager)
+---
+name: knowledge-engine-manager
+description: 管理“类脑知识引擎”的安装、更新和维护。自动构建标准目录结构、部署规则文件、生成技术栈文档，并处理 Knowledge-Skills 子模块的双向同步。
+---
 
-<skill_header>
-此技能用于在 Windows TRAE 环境下管理“类脑知识引擎”的安装、更新和维护。
-它通过标准化的目录结构和规则文件，确保多项目间的知识共享和一致性。
-</skill_header>
+# Knowledge Engine Manager
 
 ## 功能 (Features)
-- **目录构建**: 自动创建 `.trae/rules`, `.trae/logs` 等标准结构。
+- **目录构建**: 自动创建 `.trae/rules`, `.trae/logs`, `.trae/temp`, `.trae/trash` 等标准结构。
 - **规则部署**: 部署标准代码规范 (`coding-style`) 和工作流 (`workflows`)。
 - **技术栈生成**: 自动分析项目依赖，生成 `tech-stack.ts.md`。
 - **双向同步**: 管理 `Knowledge-Skills` 子模块的安装、拉取 (Pull) 和推送 (Push)。
@@ -24,14 +24,19 @@
 
 `/skill knowledge-engine-manager update` 或 `/skill knowledge-engine-manager 更新知识库`
 
+### 重新安装 (Reinstall)
+> 重新安装知识引擎，覆盖现有目录。
+
+`/skill knowledge-engine-manager reinstall` 或 `/skill knowledge-engine-manager 重新安装知识库`
+
 ## Agent 指南 (Agent Guide)
 
 ### 1. 执行流程
 当用户请求安装或更新时，请按照以下步骤操作：
 
 1.  **调用主脚本**: 
-    - 优先尝试运行: `python .trae/skills/knowledge-engine-manager/scripts/main.py [install|update]`
-    - 如果是在开发调试模式下，运行: `python knowledge-engine-manager/scripts/main.py [install|update]`
+    - 优先尝试运行: `python .trae/skills/knowledge-engine-manager/scripts/main.py [install|update|reinstall]`
+    - 如果是在开发调试模式下，运行: `python knowledge-engine-manager/scripts/main.py [install|update|reinstall]`
 2.  **检查输出**:
     - 若输出 `NEED_TECH_STACK_ANALYSIS`:
         - 调用 `LS` 列出项目根目录文件。
@@ -41,10 +46,18 @@
         - 按照 `tech-stack.ts.md` 格式生成内容。
         - 写入 `.trae/rules/core/tech-stack.ts.md`。
     - 若输出 `DIRTY_STATE_DETECTED`:
-        - 询问用户：“检测到 `.trae/skills` 有未提交的修改，您希望提交 (Commit) 还是丢弃 (Discard)？”
-        - 若用户选择提交：引导用户输入 Commit Message，然后调用 `git add .` 和 `git commit` (在 `.trae/skills` 目录下)。
-        - 若用户选择丢弃：调用 `git reset --hard` (在 `.trae/skills` 目录下)。
+        - 询问用户：“检测到 `knowledge-engine` 有未提交的修改，您希望提交 (Commit) 还是丢弃 (Discard)？”
+        - 若用户选择提交：引导用户输入 Commit Message，然后调用 `git add .` 和 `git commit` (在 `knowledge-engine` 目录下)。
+        - 若用户选择丢弃：调用 `git reset --hard` (在 `knowledge-engine` 目录下)。
         - 完成后，再次运行 `update` 命令。
+    - 若输出 `KE_EXISTS`:
+        - 询问用户：“检测到 `knowledge-engine` 目录已存在，您希望：
+          1. 重新安装（会覆盖现有目录）
+          2. 更新仓库（与远程仓库双向同步）
+          3. 取消安装流程”
+        - 若用户选择重新安装：运行 `python .trae/skills/knowledge-engine-manager/scripts/main.py reinstall`
+        - 若用户选择更新仓库：运行 `python .trae/skills/knowledge-engine-manager/scripts/main.py update`
+        - 若用户选择取消：终止操作。
 3.  **结果反馈**: 向用户汇报操作结果。
 
 ### 2. 技术栈生成提示 (Tech Stack Generation)

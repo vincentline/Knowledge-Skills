@@ -4,10 +4,12 @@
 该脚本是知识引擎管理器的入口点，支持以下操作：
 1. install: 安装知识引擎
 2. update: 更新知识引擎
+3. reinstall: 重新安装知识引擎
 
 使用方法：
     python main.py install [--root <project_root>]
     python main.py update [--root <project_root>]
+    python main.py reinstall [--root <project_root>]
 
 功能流程：
 1. 检查并创建目录结构
@@ -25,6 +27,9 @@ import directory_checker
 import git_manager
 import dependency_manager
 
+# Knowledge Engine 目录
+KNOWLEDGE_ENGINE_DIR = "knowledge-engine"
+
 @handle_exception
 def main():
     """主函数
@@ -32,7 +37,7 @@ def main():
     解析命令行参数并执行相应的操作
     """
     parser = argparse.ArgumentParser(description="Knowledge Engine Manager")
-    parser.add_argument("action", choices=["install", "update"], help="Action to perform")
+    parser.add_argument("action", choices=["install", "update", "reinstall"], help="Action to perform")
     parser.add_argument("--root", default=os.getcwd(), help="Project root directory")
     args = parser.parse_args()
     
@@ -66,29 +71,51 @@ def main():
         # 输出特定标记供 Agent 识别
         print("NEED_TECH_STACK_ANALYSIS")
     
-    # 3. Git 管理
+    # 3. 检查 knowledge-engine 目录
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
+    ke_exists = os.path.exists(ke_path) and os.listdir(ke_path)
+    
+    # 4. Git 管理
     log_message("Step 2: Managing Knowledge Engine...", "HEADER")
     if not git_manager.check_git_status(root_dir):
         log_message("Skipping Git operations (not a git repo).", "WARNING")
     else:
+        # 根据操作类型执行相应的 Git 操作
         if args.action == "install":
-            # 安装子模块
-            git_manager.install_submodule(root_dir)
+            if ke_exists:
+                # 输出特定标记供 Agent 识别
+                print("KE_EXISTS")
+                log_message(f"{KNOWLEDGE_ENGINE_DIR} directory already exists.", "INFO")
+                return
+            else:
+                # 安装子模块
+                git_manager.install_submodule(root_dir, "install")
         elif args.action == "update":
+            if not ke_exists:
+                log_message(f"{KNOWLEDGE_ENGINE_DIR} directory not found. Cannot update.", "ERROR")
+                return
+            
             # 检查是否有未提交更改
             if git_manager.check_dirty(root_dir):
                 # 输出特定标记供 Agent 识别
                 print("DIRTY_STATE_DETECTED")
-                # 提示用户手动处理或由 Agent 引导
-                log_message("Local changes detected in .trae/skills. Please commit or discard them.", "WARNING")
+                log_message(f"Local changes detected in {KNOWLEDGE_ENGINE_DIR}. Please commit or discard them.", "WARNING")
                 return
             
             # 同步子模块
-            git_manager.sync_submodule(root_dir)
+            git_manager.install_submodule(root_dir, "update")
+        elif args.action == "reinstall":
+            # 重新安装子模块
+            git_manager.install_submodule(root_dir, "reinstall")
             
-    # 4. 依赖管理
+    # 5. 依赖管理
     log_message("Step 3: Checking dependencies...", "HEADER")
-    dependency_manager.install_dependencies(root_dir)
+    # 检查 knowledge-engine 目录下的依赖
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
+    if os.path.exists(ke_path):
+        dependency_manager.install_dependencies(ke_path)
+    else:
+        log_message(f"{KNOWLEDGE_ENGINE_DIR} directory not found. Skipping dependency installation.", "WARNING")
     
     log_message("Operation completed successfully!", "SUCCESS")
 

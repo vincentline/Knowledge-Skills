@@ -19,7 +19,7 @@ from error_handler import handle_exception, log_message
 
 # Knowledge-Skills 仓库地址
 REPO_URL = "https://github.com/vincentline/Knowledge-Skills"
-SKILLS_DIR = ".trae/skills"  # 技能目录相对路径
+KNOWLEDGE_ENGINE_DIR = "knowledge-engine"  # 知识引擎目录相对路径
 
 @handle_exception
 def run_git_command(command, cwd=None):
@@ -69,7 +69,7 @@ def check_git_status(root_dir):
 
 @handle_exception
 def check_dirty(root_dir):
-    """检查 .trae/skills 是否有未提交更改
+    """检查 knowledge-engine 是否有未提交更改
     
     Args:
         root_dir (str): 项目根目录路径
@@ -77,44 +77,71 @@ def check_dirty(root_dir):
     Returns:
         bool: 有未提交更改返回 True，否则返回 False
     """
-    skills_path = os.path.join(root_dir, SKILLS_DIR)
-    if not os.path.exists(skills_path):
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
+    if not os.path.exists(ke_path):
         return False
         
     # 1. 进入子模块检查内部状态
-    output_inner = run_git_command("git status --porcelain", cwd=skills_path)
+    output_inner = run_git_command("git status --porcelain", cwd=ke_path)
     if output_inner:
-        log_message(f"Uncommitted changes in skills directory: {output_inner}", "WARNING")
+        log_message(f"Uncommitted changes in knowledge-engine directory: {output_inner}", "WARNING")
         return True
         
     return False
 
 @handle_exception
-def install_submodule(root_dir):
+def install_submodule(root_dir, action):
     """安装 Knowledge-Skills 子模块
     
     策略：
-    - 如果 .trae/skills 目录已存在且不为空，则跳过安装
-    - 否则添加子模块并初始化
+    - 如果 action 为 "reinstall"，则重新安装（覆盖现有目录）
+    - 如果 action 为 "update"，则更新现有子模块
+    - 如果 knowledge-engine 目录不存在，则创建并安装子模块
     
     Args:
         root_dir (str): 项目根目录路径
+        action (str): 操作类型，可选值: "install", "reinstall", "update"
     
     Returns:
-        bool: 安装成功返回 True，失败返回 False
+        bool: 操作成功返回 True，失败返回 False
     """
-    # 检查 .trae/skills 是否已存在（可能是空目录）
-    skills_path = os.path.join(root_dir, SKILLS_DIR)
-    if os.path.exists(skills_path) and os.listdir(skills_path):
-        log_message("Skills directory is not empty. Skipping installation.", "WARNING")
-        return True
-        
-    log_message("Installing submodule...", "INFO")
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
     
-    # 确保父目录存在
-    os.makedirs(os.path.dirname(skills_path), exist_ok=True)
+    if action == "reinstall":
+        # 重新安装：删除现有目录并重新克隆
+        if os.path.exists(ke_path):
+            import shutil
+            log_message(f"Removing existing {KNOWLEDGE_ENGINE_DIR} directory...", "INFO")
+            shutil.rmtree(ke_path)
+        
+        log_message("Reinstalling submodule...", "INFO")
+        
+    elif action == "update":
+        # 更新现有子模块
+        if not os.path.exists(ke_path):
+            log_message(f"{KNOWLEDGE_ENGINE_DIR} directory not found. Cannot update.", "ERROR")
+            return False
+        
+        return sync_submodule(root_dir)
+    
+    elif action == "install":
+        # 安装新子模块
+        if os.path.exists(ke_path) and os.listdir(ke_path):
+            log_message(f"{KNOWLEDGE_ENGINE_DIR} directory is not empty. Skipping installation.", "WARNING")
+            return True
+        
+        log_message("Installing submodule...", "INFO")
+    
+    # 确保目录存在
+    os.makedirs(ke_path, exist_ok=True)
 
-    cmd = f"git submodule add {REPO_URL} {SKILLS_DIR}"
+    # 检查是否为git仓库
+    if not check_git_status(root_dir):
+        log_message("Initializing git repository...", "INFO")
+        run_git_command("git init", cwd=root_dir)
+    
+    # 添加子模块
+    cmd = f"git submodule add {REPO_URL} {KNOWLEDGE_ENGINE_DIR}"
     if run_git_command(cmd, cwd=root_dir) is not None:
         # 初始化
         run_git_command("git submodule update --init --recursive", cwd=root_dir)
@@ -136,24 +163,24 @@ def sync_submodule(root_dir):
     Returns:
         bool: 同步成功返回 True，失败返回 False
     """
-    skills_path = os.path.join(root_dir, SKILLS_DIR)
-    if not os.path.exists(skills_path):
-        log_message("Skills directory not found.", "ERROR")
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
+    if not os.path.exists(ke_path):
+        log_message("Knowledge-engine directory not found.", "ERROR")
         return False
         
     log_message("Syncing submodule...", "INFO")
     
     # 1. Pull
-    if run_git_command("git pull origin main", cwd=skills_path) is None:
+    if run_git_command("git pull origin main", cwd=ke_path) is None:
         return False
         
     # 2. Push (尝试)
     # 只有当有新的本地 commit 时才 push
     # 检查是否有这就领先于 origin/main
-    ahead = run_git_command("git log origin/main..main", cwd=skills_path)
+    ahead = run_git_command("git log origin/main..main", cwd=ke_path)
     if ahead:
         log_message("Local commits detected. Pushing to remote...", "INFO")
-        if run_git_command("git push origin main", cwd=skills_path):
+        if run_git_command("git push origin main", cwd=ke_path):
             log_message("Pushed successfully.", "SUCCESS")
     else:
         log_message("No local commits to push.", "INFO")
@@ -171,10 +198,10 @@ def commit_changes(root_dir, message):
     Returns:
         bool: 操作成功返回 True
     """
-    skills_path = os.path.join(root_dir, SKILLS_DIR)
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
     
-    run_git_command("git add .", cwd=skills_path)
-    run_git_command(f'git commit -m "{message}"', cwd=skills_path)
+    run_git_command("git add .", cwd=ke_path)
+    run_git_command(f'git commit -m "{message}"', cwd=ke_path)
     return True
 
 @handle_exception
@@ -189,8 +216,8 @@ def discard_changes(root_dir):
     Returns:
         bool: 操作成功返回 True
     """
-    skills_path = os.path.join(root_dir, SKILLS_DIR)
+    ke_path = os.path.join(root_dir, KNOWLEDGE_ENGINE_DIR)
     
-    run_git_command("git reset --hard", cwd=skills_path)
-    run_git_command("git clean -fd", cwd=skills_path)
+    run_git_command("git reset --hard", cwd=ke_path)
+    run_git_command("git clean -fd", cwd=ke_path)
     return True

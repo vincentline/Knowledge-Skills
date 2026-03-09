@@ -26,6 +26,12 @@ BASE_DIRS = [
     ".trae/rules/modules"   # 领域规则模块目录
 ]
 
+# 特别需要检查的目录（可能被.gitignore排除）
+SPECIAL_DIRS = [
+    ".trae/temp",      # 临时文件目录
+    ".trae/trash"      # 回收站目录
+]
+
 # 模板映射: (模板路径, 目标路径)
 # 模板路径相对于 knowledge-engine-manager/templates
 # 目标路径相对于项目根目录
@@ -53,11 +59,24 @@ def check_and_create_dirs(root_dir):
         bool: 操作成功返回 True
     """
     log_message(f"Checking directory structure in {root_dir}...")
+    
+    # 检查并创建基础目录
     for rel_path in BASE_DIRS:
         full_path = os.path.join(root_dir, rel_path)
         if not os.path.exists(full_path):
             os.makedirs(full_path, exist_ok=True)
             log_message(f"Created directory: {rel_path}", "SUCCESS")
+    
+    # 特别检查可能被.gitignore排除的目录
+    log_message("Checking special directories (may be ignored by .gitignore)...")
+    for rel_path in SPECIAL_DIRS:
+        full_path = os.path.join(root_dir, rel_path)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path, exist_ok=True)
+            log_message(f"Created special directory: {rel_path}", "SUCCESS")
+        else:
+            log_message(f"Special directory exists: {rel_path}", "INFO")
+    
     return True
 
 @handle_exception
