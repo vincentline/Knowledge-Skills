@@ -32,8 +32,39 @@ import json
 import subprocess
 import re
 
-RULES_DIR = r".trae/rules/modules"
-SKILLS_DIR = r".trae/skills"
+# ============================================================================
+# 工具函数
+# ============================================================================
+
+def find_project_root():
+    """
+    查找项目根目录（包含 .trae 目录的目录）
+    
+    Returns:
+        str: 项目根目录的绝对路径，如果未找到则返回 None
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    while current_dir != os.path.dirname(current_dir):  # 到达文件系统根目录时停止
+        if os.path.exists(os.path.join(current_dir, '.trae')):
+            return current_dir
+        current_dir = os.path.dirname(current_dir)
+    return None
+
+# ============================================================================
+# 配置常量
+# ============================================================================
+
+# 项目根目录
+PROJECT_ROOT = find_project_root()
+if not PROJECT_ROOT:
+    print("❌ 错误：未找到项目根目录（.trae 目录）")
+    exit(1)
+
+# 规则目录路径
+RULES_DIR = os.path.join(PROJECT_ROOT, ".trae", "rules", "modules")
+
+# 技能目录路径
+SKILLS_DIR = os.path.join(PROJECT_ROOT, ".trae", "skills")
 
 def get_git_changed_files():
     """获取 Git 暂存区和最近一次提交的变更文件列表"""
