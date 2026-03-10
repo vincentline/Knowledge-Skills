@@ -1,8 +1,0 @@
-[
-  {
-    "source": "inbox/测试规则经验总结.md",
-    "target": "modules/engineering/testing-rules-guide.ts.md",
-    "action": "create",
-    "content_file": ".trae/temp/structured_测试规则经验总结.md"
-  }
-]
