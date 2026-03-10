@@ -47,8 +47,5 @@ dist/
 .env.test.local
 .env.production.local
 
-# TRAE
-.trae/
-
 # Exclude self
 .gitignore
