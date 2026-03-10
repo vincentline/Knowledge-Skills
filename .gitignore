@@ -50,3 +50,5 @@ dist/
 # Exclude self
 .gitignore
 
+# TRAE
+.trae/documents/
