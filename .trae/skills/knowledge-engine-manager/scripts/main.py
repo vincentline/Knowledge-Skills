@@ -30,6 +30,20 @@ import dependency_manager
 # Knowledge Engine 目录
 KNOWLEDGE_ENGINE_DIR = "knowledge-engine"
 
+def find_project_root():
+    """
+    查找项目根目录（包含 .trae 目录的目录）
+    
+    Returns:
+        str: 项目根目录的绝对路径，如果未找到则返回 None
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    while current_dir != os.path.dirname(current_dir):  # 到达文件系统根目录时停止
+        if os.path.exists(os.path.join(current_dir, '.trae')):
+            return current_dir
+        current_dir = os.path.dirname(current_dir)
+    return None
+
 @handle_exception
 def check_index_files(root_dir):
     """检查并生成 index.md 文件内容
@@ -58,10 +72,21 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Knowledge Engine Manager")
     parser.add_argument("action", choices=["install", "update", "reinstall"], help="Action to perform")
-    parser.add_argument("--root", default=os.getcwd(), help="Project root directory")
+    parser.add_argument("--root", default=None, help="Project root directory")
     args = parser.parse_args()
     
-    root_dir = os.path.abspath(args.root)
+    # 确定项目根目录
+    if args.root:
+        root_dir = os.path.abspath(args.root)
+    else:
+        # 尝试自动查找项目根目录
+        auto_root = find_project_root()
+        if auto_root:
+            root_dir = auto_root
+        else:
+            # 如果找不到，使用当前目录
+            root_dir = os.path.abspath(os.getcwd())
+    
     # 获取脚本所在的目录 (scripts) 的父目录 (knowledge-engine-manager)
     skill_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
