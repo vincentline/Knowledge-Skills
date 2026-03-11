@@ -112,9 +112,12 @@ def get_git_changed_files():
 def check_naming_convention(file_path):
     """检查文件命名是否符合拆分文件命名规则
     
-    规则：拆分文件（除index外）必须包含原大文件的文件名作为前缀
-    格式：{原文件名}-{后缀}{扩展名}
-    示例：原文件 123.ts.md，拆分后 123-main-feature.ts.md
+    规则：
+    1. 子目录中的文件（非 index.ts.md）必须包含父目录名作为前缀
+    2. 格式：{父目录名}-{功能名}.ts.md
+    3. 示例：konva/coordinates.ts.md 应命名为 konva-coordinates.ts.md
+    
+    注意：此规则适用于 modules 目录下的所有子目录文件
     """
     issues = []
     
@@ -132,44 +135,26 @@ def check_naming_convention(file_path):
     else:
         name, ext = os.path.splitext(basename)
     
-    # 检查是否包含连字符（表示可能是拆分文件）
-    if '-' in name:
-        # 提取前缀部分
-        parts = name.split('-')
-        prefix = parts[0]
-        suffix = '-'.join(parts[1:])
+    # 获取父目录名
+    parent_dir = os.path.basename(dir_path)
+    
+    # 检查是否在 modules 目录下
+    normalized_rules_dir = RULES_DIR.replace("/", os.sep).rstrip(os.sep)
+    normalized_file_path = file_path.replace("/", os.sep)
+    
+    if normalized_rules_dir in normalized_file_path:
+        # 计算文件相对于 modules 目录的深度
+        rel_path = os.path.relpath(file_path, RULES_DIR)
+        depth = rel_path.count(os.sep)
         
-        # 检查命名格式是否规范
-        if not suffix:
-            issues.append({
-                "type": "warning",
-                "code": "naming_convention",
-                "msg": f"File name '{basename}' has empty suffix after hyphen."
-            })
-        
-        # 检查同目录下是否存在对应的原文件
-        original_file = os.path.join(dir_path, f"{prefix}{ext}")
-        original_exists = False
-        
-        # 检查原文件是否存在
-        if os.path.exists(original_file):
-            original_exists = True
-        # 检查对应的 .ts.md 文件
-        elif ext == '.md':
-            original_ts_file = os.path.join(dir_path, f"{prefix}.ts.md")
-            if os.path.exists(original_ts_file):
-                original_exists = True
-        
-        if not original_exists:
-            # 检查文件内容是否完整，判断是否为独立文件
-            if is_independent_file(file_path):
-                # 独立文件，不触发警告
-                pass
-            else:
+        # 如果文件在 modules 的子目录中（depth >= 1），则需要前缀
+        if depth >= 1:
+            expected_prefix = parent_dir + "-"
+            if not name.startswith(expected_prefix):
                 issues.append({
                     "type": "warning",
                     "code": "naming_convention",
-                    "msg": f"File name '{basename}' appears to be a split file but no corresponding original file found."
+                    "msg": f"File '{basename}' should be named '{parent_dir}-{name}.ts.md' to include parent directory prefix."
                 })
     
     return issues
@@ -270,7 +255,12 @@ def main():
     # 确定扫描目标
     scan_dirs = []
     if args.target:
-        scan_dirs.append(args.target)
+        # 处理相对路径：如果是简单名称如 'modules'，转换为完整路径
+        if not os.path.isabs(args.target) and not os.path.sep in args.target:
+            target_path = os.path.join(os.path.dirname(RULES_DIR), args.target)
+        else:
+            target_path = args.target
+        scan_dirs.append(target_path)
     else:
         scan_dirs.append(RULES_DIR)
         scan_dirs.append(SKILLS_DIR)
