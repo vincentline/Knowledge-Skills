@@ -123,7 +123,7 @@ def ensure_log_file():
 
 def append_log(action, file_path, description):
     """
-    向日志文件追加一条更新记录。
+    向日志文件插入一条更新记录（插入到记录列表最上方）。
     
     Args:
         action (str): 操作类型，必须在 ACTION_TYPES 列表中。
@@ -146,28 +146,33 @@ def append_log(action, file_path, description):
     timestamp = get_beijing_time()
     
     # 构造日志条目格式: [时间] 【类型】 : 路径 - 描述
-    # 移除描述中的换行符，确保一行一条记录 (或者你可以决定支持多行，但标准Markdown表格通常一行)
-    # 这里我们保持简单，将换行替换为空格，避免破坏日志结构
     clean_desc = description.replace('\n', ' ').strip()
     entry = f"[{timestamp}] 【{action}】 : {file_path} - {clean_desc}\n"
     
     try:
-        # 检查文件末尾是否已有换行符，避免新记录拼接在上一行末尾
-        need_newline = False
-        if os.path.exists(LOG_FILE) and os.path.getsize(LOG_FILE) > 0:
-            with open(LOG_FILE, 'rb') as f:
-                # 移动指针到文件倒数第一个字节
-                f.seek(-1, os.SEEK_END)
-                last_char = f.read(1)
-                # 如果不是换行符，则标记需要补充换行
-                if last_char != b'\n':
-                    need_newline = True
-
-        # 以追加模式 ('a') 打开文件写入
-        with open(LOG_FILE, 'a', encoding='utf-8') as f:
-            if need_newline:
-                f.write('\n')
-            f.write(entry)
+        # 读取现有文件内容
+        with open(LOG_FILE, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        # 查找插入位置：在 "## 记录列表" 之后找到第一个非空行或记录行
+        insert_index = len(lines)  # 默认插入到末尾
+        for i, line in enumerate(lines):
+            if '## 记录列表' in line:
+                # 找到 "## 记录列表" 后，跳过空行和说明行，找到第一条记录的位置
+                insert_index = i + 1
+                while insert_index < len(lines):
+                    # 跳过空行和以 > 开头的说明行
+                    if lines[insert_index].strip() and not lines[insert_index].strip().startswith('>'):
+                        break
+                    insert_index += 1
+                break
+        
+        # 插入新记录
+        lines.insert(insert_index, entry)
+        
+        # 写回文件
+        with open(LOG_FILE, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
             
         print(f"✅ Logged: {entry.strip()}")
         

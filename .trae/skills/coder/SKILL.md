@@ -2,10 +2,10 @@
 name: coder
 display_name: 老工匠 (Auto Coder)
 description: 当用户请求编写代码、修改功能、修复 Bug、重构代码、添加新特性、或涉及任何代码变更时，必须立即调用此技能。此技能确保代码符合项目规范，强制查阅知识库规则。
-version: 3.1.0
+version: 3.4.0
 ---
 
-# Coder Skill （老工匠） v3.1
+# Coder Skill （老工匠） v3.4
 
 此技能用于指导 AI 在编写代码时遵循项目的"类脑知识引擎"规范，确保代码质量和一致性。
 
@@ -49,16 +49,56 @@ version: 3.1.0
 **实现方式**：使用 `AskUserQuestion` 工具与用户交互，提供清晰的选项和补充信息输入。
 
 ### 1. 获取上下文 (Context)
-- **查阅规则 (Rules)**: 
-    - 读取 `.trae/rules/index.md` 定位**领域分类**。
-    - 读取相关领域的 `.ts.md` 文件。
-- **查阅经验 (Inbox)**: 浏览 `.trae/rules/inbox/` 查找最新经验。
-- **查阅代码 (Codebase)**: 
-    - **兜底策略**: 若找不到明确的规则文档，**必须**使用 `SearchCodebase` 或 `Read` 查找项目中的相似代码，并**模仿**其风格（命名、注释、结构）。
-- **用户确认**: 在执行前，若需要用户确认或用户提供信息，**必须**使用 `AskUserQuestion` 工具与用户交互。
+
+- **查阅知识库**: 读取 `.trae/rules/index.md`，用 Grep 搜索 `.trae/rules/modules/` 定位领域知识。
+- **查阅经验碎片**: 读取 `.trae/rules/inbox/`（可能为空）。
+- **查阅代码**: 知识库不足时，用 SearchCodebase 查找相似代码模仿风格。
+- **用户确认**: 若需要用户确认或补充信息，**必须**使用 `AskUserQuestion` 工具交互。
 
 ### 2. 执行与记录 (Execute & Log)
 - **执行**: 编写或修改代码。
+- **注释规范 (MANDATORY)**:
+    - **文件头**: 每个文件必须有功能说明注释。
+    - **公共 API**: 所有对外暴露的函数、类、接口必须有注释。
+    - **注释语言**: 使用中文。
+    - **格式要求**: 根据语言/技术选择合适的注释格式。
+    - **通用原则**:
+        - 说明"做什么"（功能）
+        - 说明"输入什么"（参数）
+        - 说明"输出什么"（返回值）
+        - 说明"注意什么"（边界条件、副作用）
+    - **常见格式示例**:
+        ```typescript
+        // TypeScript/JavaScript (JSDoc)
+        /**
+         * 功能描述
+         * @param paramName - 参数说明
+         * @returns 返回值说明
+         */
+        ```
+        ```python
+        # Python (Docstring)
+        def function_name(param_name: type) -> return_type:
+            """功能描述
+            
+            Args:
+                param_name: 参数说明
+                
+            Returns:
+                返回值说明
+            """
+        ```
+        ```vue
+        <!-- Vue 组件 -->
+        <!--
+        组件名称
+        功能描述
+        Props:
+          - propName: 说明
+        Emits:
+          - eventName: 说明
+        -->
+        ```
 - **用户确认**: 在执行过程中，若遇到需要用户确认的设计决策、技术选型或其他信息需求，**必须**使用 `AskUserQuestion` 工具与用户交互。
 - **记录日志 (MANDATORY)**: 
     - 每完成一个文件的修改，**必须**立即调用日志脚本记录变更。
@@ -73,6 +113,7 @@ version: 3.1.0
 ### 3. 自检 (Verify)
 提交前必须完成以下检查：
 - [ ] **Lint**: 运行 `npm run lint` 或 `ruff check` (如有配置)。
+- [ ] **JSDoc**: 检查所有公共 API 是否有 JSDoc 注释，缺失则补充。
 - [ ] **Test**: 运行相关测试用例 (如有配置)。
 - [ ] **Style**: 确认新代码与现有代码风格一致。
 - [ ] **Log**: 确认所有文件变更都已通过脚本记录到 `UPDATE_LOG.md`。
