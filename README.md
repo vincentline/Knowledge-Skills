@@ -1,6 +1,6 @@
 # 知识引擎使用帮助与目录指南
 
-用于IDE Agent使用的，基于Markdown数据格式的，rules+skills实现经验管理的知识库方案。
+用于IDE Agent使用的，基于Markdown数据格式的，rules+skills实现经验管理的，知识库方案。
 
 ## 1. 核心目录结构说明
 
