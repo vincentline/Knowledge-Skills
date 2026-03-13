@@ -25,28 +25,23 @@ alwaysApply: true
 | **2. 查规则** | 读 `rules/index.md` 定位规则文件 |
 | **3. 读领域规则** | 读 `modules/<domain>/` 获取开发规范 |
 | **4. 查经验** | 读 `inbox/index.md` 查看未归档经验 |
-| **5. 用户确认** | 需要用户确认或用户提供信息时，使用 `AskUserQuestion` 工具与用户交互 |
 
 #### ⚠️ 开发中 (During Coding)
 - **禁止猜测 API**：未知 API 必须查阅官方文档或 `WebSearch`
 - **禁止未查规则直接写**：必须先完成开发前检查
 - **模仿代码风格**：`SearchCodebase` 找相似文件 + 参考 `coding-style.ts.md`
-- **用户确认**：遇到需要用户确认的设计决策或技术选型时，使用 `AskUserQuestion` 工具与用户交互
 
 #### ✅ 开发后 (After Coding)
 - **测试验证**：`webapp-testing` 或手动测试，确保功能正常、无报错
 - **记录经验**：解决非显而易见 Bug / 发现技术坑点 / 完成复杂功能 / 性能优化 → 调用 `/skill knowledge-gardener`
-- **用户确认**：测试结果需要用户确认或需要用户提供额外测试信息时，使用 `AskUserQuestion` 工具与用户交互
 
 #### 🔒 提交前 (Before Commit)
 - **检查覆盖率**：调用 `/skill integrity-check` 确保 Inbox 覆盖率
-- **用户确认**：提交前需要用户确认变更内容或提交信息时，使用 `AskUserQuestion` 工具与用户交互
 
 #### 🔄 异常处理 (Exception Handling)
 - **测试失败** → 修复 → 重测 → 记录经验
 - **规则冲突**：优先级 `core/` > `modules/` > `inbox/`
 - **多领域任务**：按主次顺序查阅规则
-- **信息缺失**：需要用户确认或用户提供信息时，使用 `AskUserQuestion` 工具与用户交互
 
 ### 2.2 信息来源优先级
 官方文档 > 权威技术博客 > 开源项目 Issues > Stack Overflow 高票回答

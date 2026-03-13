@@ -30,19 +30,32 @@ import dependency_manager
 # Knowledge Engine 目录
 KNOWLEDGE_ENGINE_DIR = "knowledge-engine"
 
-def find_project_root():
-    """
-    查找项目根目录（包含 .trae 目录的目录）
+@handle_exception
+def check_architecture_file(root_dir):
+    """检查 architecture.md 文件是否存在且需要填写
+    
+    Args:
+        root_dir (str): 项目根目录路径
     
     Returns:
-        str: 项目根目录的绝对路径，如果未找到则返回 None
+        bool: 需要填写返回 True，否则返回 False
     """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    while current_dir != os.path.dirname(current_dir):  # 到达文件系统根目录时停止
-        if os.path.exists(os.path.join(current_dir, '.trae')):
-            return current_dir
-        current_dir = os.path.dirname(current_dir)
-    return None
+    arch_path = os.path.join(root_dir, ".trae", "rules", "core", "architecture.md")
+    
+    if not os.path.exists(arch_path):
+        return True
+    
+    with open(arch_path, 'r', encoding='utf-8') as f:
+        content = f.read().strip()
+        
+    # 检查是否是空模板（只有 frontmatter 和注释）
+    lines = [l for l in content.split('\n') if l.strip() and not l.strip().startswith('<!--') and not l.strip().startswith('#') and not l.strip().startswith('---') and not l.strip().startswith('>')]
+    
+    # 如果没有实际内容，返回 True
+    if len(lines) < 5:
+        return True
+    
+    return False
 
 @handle_exception
 def check_index_files(root_dir):
@@ -72,21 +85,10 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Knowledge Engine Manager")
     parser.add_argument("action", choices=["install", "update", "reinstall"], help="Action to perform")
-    parser.add_argument("--root", default=None, help="Project root directory")
+    parser.add_argument("--root", default=os.getcwd(), help="Project root directory")
     args = parser.parse_args()
     
-    # 确定项目根目录
-    if args.root:
-        root_dir = os.path.abspath(args.root)
-    else:
-        # 尝试自动查找项目根目录
-        auto_root = find_project_root()
-        if auto_root:
-            root_dir = auto_root
-        else:
-            # 如果找不到，使用当前目录
-            root_dir = os.path.abspath(os.getcwd())
-    
+    root_dir = os.path.abspath(args.root)
     # 获取脚本所在的目录 (scripts) 的父目录 (knowledge-engine-manager)
     skill_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
@@ -109,7 +111,18 @@ def main():
     directory_checker.check_and_create_dirs(root_dir)
     directory_checker.deploy_templates(root_dir, skill_root)
     
-    # 2. 检查 index.md 文件是否需要生成内容
+    # 2. 检查 architecture.md 文件是否需要填写
+    if check_architecture_file(root_dir):
+        log_message("Architecture file needs to be filled.", "WARNING")
+        # 输出特定标记供 Agent 识别
+        print("[STATE] NEED_ARCHITECTURE")
+        print("[ACTION] Agent should analyze project structure and fill .trae/rules/core/architecture.md")
+        status["architecture"] = "NEEDED"
+        status["next_step"] = "Agent should fill architecture.md"
+    else:
+        status["architecture"] = "EXISTS"
+    
+    # 3. 检查 index.md 文件是否需要生成内容
     if check_index_files(root_dir):
         log_message("Index files need content generation.", "WARNING")
         # 输出特定标记供 Agent 识别
@@ -248,18 +261,21 @@ def main():
     print("[SUMMARY]")
     print(f"- Directories: {status['directories']}")
     print(f"- Templates: {status['templates']}")
+    print(f"- Architecture: {status.get('architecture', 'EXISTS')}")
     print(f"- TechStack: {status['tech_stack']}")
     print(f"- Submodule: {status['submodule']}")
     print(f"- Dependencies: {status['dependencies']}")
     print(f"- NextStep: {status['next_step']}")
     
     # 7. 最终状态
-    if status["submodule"] == "SUCCESS" and status["tech_stack"] == "EXISTS":
+    if status["submodule"] == "SUCCESS" and status["tech_stack"] == "EXISTS" and status.get("architecture") != "NEEDED":
         log_message("Operation completed successfully!", "SUCCESS")
         print("[STATE] SUCCESS")
     else:
         if status["submodule"] == "FAILED":
             log_message("Operation failed!", "ERROR")
+        elif status.get("architecture") == "NEEDED":
+            log_message("Operation completed. Architecture document needs to be filled.", "WARNING")
         else:
             log_message("Operation completed with some issues.", "WARNING")
 

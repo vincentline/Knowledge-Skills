@@ -38,25 +38,8 @@ class Colors:
     BOLD = '\033[1m'         # 粗体
     UNDERLINE = '\033[4m'     # 下划线
 
-def find_project_root():
-    """
-    查找项目根目录（包含 .trae 目录的目录）
-    
-    Returns:
-        str: 项目根目录的绝对路径，如果未找到则返回 None
-    """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    while current_dir != os.path.dirname(current_dir):  # 到达文件系统根目录时停止
-        if os.path.exists(os.path.join(current_dir, '.trae')):
-            return current_dir
-        current_dir = os.path.dirname(current_dir)
-    return None
-
-# 项目根目录
-PROJECT_ROOT = find_project_root() or os.path.abspath(os.getcwd())
-
-# 日志路径 (基于项目根目录)
-LOG_FILE = os.path.join(PROJECT_ROOT, ".trae", "logs", "error-log.md")
+# 日志路径 (相对于项目根目录)
+LOG_FILE = os.path.join(".trae", "logs", "error-log.md")
 
 def log_message(message, level="INFO"):
     """打印日志并记录到文件（如果是错误）

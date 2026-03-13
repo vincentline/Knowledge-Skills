@@ -15,7 +15,7 @@ import os
 import shutil
 from error_handler import handle_exception, log_message
 
-# 基础目录结构
+# 基础目录结构 
 BASE_DIRS = [
     ".trae/logs",      # 日志目录
     ".trae/temp",      # 临时文件目录
@@ -39,6 +39,7 @@ TEMPLATE_MAPPING = {
     "UPDATE_LOG.md": ".trae/logs/UPDATE_LOG.md",                    # 更新日志模板
     "coding-style.ts.md": ".trae/rules/core/coding-style.ts.md",    # 代码风格规范
     "workflows.ts.md": ".trae/rules/core/workflows.ts.md",          # 工作流规范
+    "architecture.md": ".trae/rules/core/architecture.md",          # 项目架构文档
     "core-rules.md": ".trae/rules/core-rules.md",                  # 核心规则文件
     "index.md": [
         ".trae/rules/index.md",           # 规则索引
