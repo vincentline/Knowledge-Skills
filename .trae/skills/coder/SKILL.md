@@ -2,10 +2,10 @@
 name: coder
 display_name: 老工匠 (Auto Coder)
 description: 当用户请求编写代码、修改功能、修复 Bug、重构代码、添加新特性、或涉及任何代码变更时，必须立即调用此技能。此技能确保代码符合项目规范，强制查阅知识库规则。
-version: 3.4.0
+version: 3.5.0
 ---
 
-# Coder Skill （老工匠） v3.4
+# Coder Skill （老工匠） v3.5
 
 此技能用于指导 AI 在编写代码时遵循项目的"类脑知识引擎"规范，确保代码质量和一致性。
 
@@ -26,7 +26,7 @@ version: 3.4.0
 
 ## 核心指令 (Core Instructions)
 
-按以下 **Plan - Act - Log - Verify** 闭环流程执行：
+按以下 **Plan - Act - Log - Experience Check - Verify** 闭环流程执行：
 
 ### 0. 任务评估 (Triage)
 在开始前，先评估任务规模：
@@ -110,7 +110,24 @@ version: 3.4.0
     - **备用方式 (CLI Mode)**: 仅适用于短描述。
         - `python .trae/skills/coder/scripts/log_change.py --action [修改文件/新增文件] --file [相对路径] --desc [简短中文描述]`
 
-### 3. 自检 (Verify)
+### 3. 经验检查 (Experience Check)
+
+任务完成后，**必须**检查是否有值得总结的经验：
+
+**判断维度**：
+- **稀缺性**：Agent 首次遇到的问题、项目独创的技术方案
+- **决策价值**：技术选型、架构决策、关键配置
+- **问题解决价值**：Bug 修复、性能优化、坑点规避
+
+**执行流程**：
+1. 回顾整个任务过程
+2. 根据判断维度检查是否有值得总结的经验
+3. 如有，调用 `AskUserQuestion` 询问用户是否记录
+   - 问题格式："发现以下经验值得记录，是否保存到 Inbox？\n- [经验摘要]"
+   - 选项："是，记录下来" / "否，不需要"
+4. 用户确认后，调用 `/skill knowledge-gardener` 记录
+
+### 4. 自检 (Verify)
 提交前必须完成以下检查：
 - [ ] **Lint**: 运行 `npm run lint` 或 `ruff check` (如有配置)。
 - [ ] **JSDoc**: 检查所有公共 API 是否有 JSDoc 注释，缺失则补充。
@@ -118,5 +135,5 @@ version: 3.4.0
 - [ ] **Style**: 确认新代码与现有代码风格一致。
 - [ ] **Log**: 确认所有文件变更都已通过脚本记录到 `UPDATE_LOG.md`。
 
-### 4. 提交建议 (Commit Advice)
+### 5. 提交建议 (Commit Advice)
 - 代码完成后，提醒用户运行 `/skill integrity-check` 进行提交前检查。
