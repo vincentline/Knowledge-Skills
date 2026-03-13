@@ -4,7 +4,7 @@
 /**
  * 代码风格与命名规范
  * Code Style & Naming Conventions
- * @reference f:\my_tools\MeeWoo\MeeWoo\CODE_STYLE.md
+ * @reference .trae/rules/core/coding-style.ts.md
  */
 export interface CodingStyle {
   /**
