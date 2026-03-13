@@ -4,8 +4,9 @@ alwaysApply: true
 > 本文档是项目的**核心原则**与**知识引擎入口**。所有开发行为必须遵循以下规则，并优先查阅知识引擎中的具体规范。
 
 ## 1. 知识引擎指引 (Knowledge Engine Router)
-项目已全面启用“类脑知识引擎”，所有技术决策必须基于 `.trae/rules/` 下的最新规范。
+项目已全面启用"类脑知识引擎"，所有技术决策必须基于 `.trae/rules/` 下的最新规范。
 
+- **查阅架构设计**: 请移步 [.trae/rules/core/architecture.md](.trae/rules/core/architecture.md)
 - **查阅代码规范**: 请移步 [.trae/rules/core/coding-style.ts.md](.trae/rules/core/coding-style.ts.md)
 - **查阅技术栈**: 请移步 [.trae/rules/core/tech-stack.ts.md](.trae/rules/core/tech-stack.ts.md)
 - **查阅工作流**: 请移步 [.trae/rules/core/workflows.ts.md](.trae/rules/core/workflows.ts.md)
