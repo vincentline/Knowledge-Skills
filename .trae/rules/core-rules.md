@@ -3,6 +3,25 @@ alwaysApply: true
 ---
 > 本文档是项目的**核心原则**与**知识引擎入口**。所有开发行为必须遵循以下规则，并优先查阅知识引擎中的具体规范。
 
+## 0. 会话启动检查 (Session Startup Checklist)
+> ⚠️ **每次会话开始必须执行**，确保具备完整的项目上下文
+
+### 启动时（轻量）
+```
+Read .trae/memory/SUMMARY.md  → 了解最近活动 + 关键词触发表
+```
+
+### 关键词触发（按需）
+> 用户消息包含关键词时，先读取详情再回应
+
+| 关键词 | 触发读取 |
+|:---|:---|
+| `游戏`/`王者`/`荣耀`/英雄名 | `user-profile.md` |
+| `环境`/`系统`/`VPN` | `user-profile.md` |
+| `上次`/`之前`/`继续` | `sessions/最新文件` |
+
+> **强制规则**: 用户消息包含关键词时，必须先读取对应详情，再回应！
+
 ## 1. 知识引擎指引 (Knowledge Engine Router)
 项目已全面启用"类脑知识引擎"，所有技术决策必须基于 `.trae/rules/` 下的最新规范。
 
@@ -10,6 +29,7 @@ alwaysApply: true
 - **查阅代码规范**: 请移步 [.trae/rules/core/coding-style.ts.md](.trae/rules/core/coding-style.ts.md)
 - **查阅技术栈**: 请移步 [.trae/rules/core/tech-stack.ts.md](.trae/rules/core/tech-stack.ts.md)
 - **查阅工作流**: 请移步 [.trae/rules/core/workflows.ts.md](.trae/rules/core/workflows.ts.md)
+- **查阅自我进化**: 请移步 [.trae/rules/core/self-evolution.ts.md](.trae/rules/core/self-evolution.ts.md)
 - **查阅功能模块**: 请使用 `LS .trae/rules/modules/` 查看领域索引，支持扁平文件 (`*.ts.md`) 和聚合目录 (`dir/index.ts.md`) 两种形式。
 
 ## 2. 行为准则 (Behavioral Guidelines)
@@ -33,7 +53,8 @@ alwaysApply: true
 
 #### ✅ 开发后 (After Coding)
 - **测试验证**：`webapp-testing` 或手动测试，确保功能正常、无报错
-- **经验检查**：任务完成后，检查是否有值得总结的经验（稀缺性/决策价值/问题解决价值），如有则询问用户是否记录
+- **记忆记录**：自动记录活动到 `memory/sessions/`
+- **知识判断**：判断经验是否有价值（复用/参考/查阅），有价值则询问用户是否记录到知识引擎
 
 #### 🔒 提交前 (Before Commit)
 - **检查覆盖率**：调用 `/skill integrity-check` 确保 Inbox 覆盖率

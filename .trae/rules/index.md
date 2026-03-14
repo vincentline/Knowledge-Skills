@@ -11,6 +11,7 @@ alwaysApply: true
 | **技术栈** | [tech-stack.ts.md](core/tech-stack.ts.md) | `stack`, `python` |
 | **代码风格** | [coding-style.ts.md](core/coding-style.ts.md) | `style`, `naming` |
 | **工作流** | [workflows.ts.md](core/workflows.ts.md) | `git`, `commit`, `log` |
+| **自我进化** | [self-evolution.ts.md](core/self-evolution.ts.md) | `memory`, `autonomy`, `search` |
 
 ## 2. 领域分类 (Domains)
 | 领域名称 | 描述 | 关键词 |
@@ -26,6 +27,7 @@ alwaysApply: true
 ## 3. 技能索引 (Skills Index)
 | 技能名称 | 目录入口 | 功能描述 |
 | :--- | :--- | :--- |
+| **会话启动** | [session-startup/](session-startup/) | 记忆激活, 上下文感知 |
 | **Coder 技能** | [coder/](coder/) | 脚本工具, 模板 |
 | **完整性检查** | [integrity-check/](integrity-check/) | 发布脚本, 变更扫描 |
 | **知识医生** | [knowledge-doctor/](knowledge-doctor/) | 扫描器, 处理工具 |
@@ -55,3 +57,14 @@ alwaysApply: true
 | **错误日志** | [error-log.md](logs/error-log.md) | `bug`, `fix` |
 | **决策日志** | [decision-log.md](logs/decision-log.md) | `adr`, `arch` |
 | **变更日志** | [UPDATE_LOG.md](../logs/UPDATE_LOG.md) | `log`, `change` |
+
+## 5. 记忆系统 (Memory System)
+> 跨会话记忆存储，解决会话隔离问题
+
+| 记忆类型 | 文件路径 | 用途 |
+| :--- | :--- | :--- |
+| **用户画像** | [memory/user-profile.md](../memory/user-profile.md) | 记录用户信息 |
+| **会话记忆** | [memory/sessions/](../memory/sessions/) | 记录发生了什么 |
+| **能力记忆** | [memory/capabilities/index.md](../memory/capabilities/index.md) | 记录会做什么 |
+| **决策记忆** | [memory/decisions/index.md](../memory/decisions/index.md) | 记录为什么这么做 |
+| **模式记忆** | [memory/patterns/index.md](../memory/patterns/index.md) | 记录规律总结 |
