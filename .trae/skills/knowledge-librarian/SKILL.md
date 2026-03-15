@@ -1,10 +1,10 @@
 ---
 name: knowledge-librarian
 description: 负责将 Inbox（海马体）中的经验碎片整理、归档到长期规则库（皮层）中。
-version: 6.0.0
+version: 6.1.0
 ---
 
-# Knowledge Librarian Skill (图书管理员 v6.0)
+# Knowledge Librarian Skill (图书管理员 v6.1)
 
 此技能模仿人脑的“睡眠整理”功能，负责将短期记忆转化为长期记忆。
 v6.0 引入了**智能结构化 (Smart Structuring)**，由 Agent 负责将碎片重写为标准的 TypeScript Interface 规则。
@@ -52,7 +52,7 @@ Agent 必须根据选择的模板（在 `.trae/skills/knowledge-librarian/templa
 [
   {
     "source": "inbox/note1.md",
-    "target": "modules/ui/button.ts.md",
+    "target": ".trae/rules/modules/ui/button.ts.md",
     "action": "create",
     "content_file": ".trae/temp/structured_note1.md"
   }
