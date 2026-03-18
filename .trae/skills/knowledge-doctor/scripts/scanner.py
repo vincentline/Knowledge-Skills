@@ -63,9 +63,6 @@ if not PROJECT_ROOT:
 # 规则目录路径
 RULES_DIR = os.path.join(PROJECT_ROOT, ".trae", "rules", "modules")
 
-# 技能目录路径
-SKILLS_DIR = os.path.join(PROJECT_ROOT, ".trae", "skills")
-
 def get_git_changed_files():
     """获取 Git 暂存区和最近一次提交的变更文件列表"""
     changed_files = set()
@@ -96,15 +93,14 @@ def get_git_changed_files():
         print(f"⚠️ Git command failed: {e}. Falling back to full scan.", file=sys.stderr)
         return None # 返回 None 表示获取失败，应转为全量
 
-    # 过滤出 .trae/rules/modules 和 .trae/skills 下的文件
+    # 过滤出 .trae/rules/modules 下的文件
     filtered = []
     for f in changed_files:
         # 统一路径分隔符
         f = f.replace("/", os.sep)
         is_module = RULES_DIR.replace("/", os.sep) in f and (f.endswith(".ts.md") or f.endswith(".md"))
-        is_skill = SKILLS_DIR.replace("/", os.sep) in f and f.endswith(".md")
         
-        if (is_module or is_skill) and os.path.exists(f):
+        if is_module and os.path.exists(f):
             filtered.append(f)
     
     return filtered
@@ -208,10 +204,7 @@ def scan_file(file_path):
         })
     
     # 检查 TS Interface (export interface ...)
-    # 特殊情况：skills 目录下的 SKILL.md 可能不需要严格的 TS Interface，
-    # 但拥有它是好的实践。让我们强制执行它以促进标准化。
-    is_skill = SKILLS_DIR.replace("/", os.sep) in file_path
-    if not is_skill and "export interface" not in content:
+    if "export interface" not in content:
         issues.append({
             "type": "critical", 
             "code": "format_error", 
@@ -263,7 +256,6 @@ def main():
         scan_dirs.append(target_path)
     else:
         scan_dirs.append(RULES_DIR)
-        scan_dirs.append(SKILLS_DIR)
     
     files_to_scan = []
 
