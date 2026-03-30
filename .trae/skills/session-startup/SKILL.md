@@ -28,13 +28,7 @@ python scripts/record_session.py [活动描述/总结内容]
 2. 根据关键词触发读取详情（见关键词触发表）
 ```
 
-### Phase 2: 项目感知（可选）
-```
-3. git status --short
-4. git log -3 --oneline
-```
-
-### Phase 3: 声明与标记
+### Phase 2: 声明与标记
 ```
 5. 回复开头声明：🧠 记忆已激活
 6. 回复末尾标记：<!-- startup-check: done -->
@@ -44,7 +38,6 @@ python scripts/record_session.py [活动描述/总结内容]
 
 | 用户消息包含 | 触发读取 |
 |:---|:---|
-| `游戏`/`王者`/`荣耀`/英雄名 | `memory/user-profile.md` |
 | `环境`/`系统`/`VPN` | `memory/user-profile.md` |
 | `上次`/`之前`/`继续` | `memory/sessions/最新文件` |
 
@@ -69,7 +62,6 @@ python scripts/record_session.py [活动描述/总结内容]
 | 情况 | 处理 |
 |:---|:---|
 | 记忆文件不存在 | 创建新文件，报告"首次会话" |
-| git 命令失败 | 跳过变更扫描 |
 
 ## 脚本参考
 

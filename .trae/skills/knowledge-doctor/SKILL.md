@@ -1,61 +1,42 @@
-***
-
+---
 name: knowledge-doctor
-description: 知识引擎的健康守护者。负责对 Rules 模块进行诊断（格式、正确性、去重、拆分）和治疗。
-version: 1.1.0
---------------
+description: 知识引擎的健康守护者。负责对 Rules 模块进行诊断（碎片化、去重、事实查证）和治疗。
+version: 2.2.0
+---
 
-# Knowledge Doctor Skill (知识医生)
+# Knowledge Doctor Skill (知识医生 v2.2)
 
 此技能模仿医生的"诊断-治疗"流程，负责维护知识库的健康。
-核心职责：**Format (格式化)**, **Fact (查证)**, **Dedup (去重)**, **Split (拆分)**。
+在 V2 架构中，医生的核心职责是**对抗知识库的熵增（碎片化与去重）**，并具备**高度自治权**。
 
-## 🎯 作用范围 (Scope)
+## 🎯 核心职责 (Core Responsibilities)
 
-| 路径                     | 操作权限         |
-| :--------------------- | :----------- |
-| `.trae/rules/modules/` | ✅ 可读写（诊断+治疗） |
-| `.trae/rules/core/`    | ❌ 只读检查       |
-| `.trae/rules/inbox/`   | ❌ 不扫描        |
-| `.trae/skills/`        | ❌ 禁止修改        |
-| 项目源码/配置文件              | ❌ 禁止修改       |
+1. **碎片化 (Fission)**: 拦截长篇大论，将超过 300 行的文档拆分为单一主题的微型卡片，便于 AI 进行 RAG (检索增强) 调用。
+2. **去重 (Dedup)**: 发现并合并内容高度重叠的规则文件。
+3. **静默治疗 (Silent Treatment)**: 在用户离席时自动完成重构与清理工作，无需人工确认。
 
 ## 触发机制 (Trigger)
-
-当用户输入以下意图时触发：
-
-- "整理知识库" / "检查知识库" / "知识体检"
-- "修复文档格式" / "去重"
-- "拆分大文件" / "验证知识准确性"
+通常由用户主动呼叫，例如：
+- "调用医生检查和修复知识库"
+- "整理一下知识库"
+- "去重" / "拆分大文件"
 
 ## ⚠️ 核心禁令 (Strict Prohibitions)
-
-- **禁止使用** **`DeleteFile`** **工具操作规则文件**: 任何时候都不得直接删除 `.trae/rules/modules` 中的文件。所有删除工作必须由 `treatment.py` 脚本静默完成（软删除）。
-- **禁止猜测**: 修正知识点时，必须有明确的证据（WebSearch 结果或代码库现状）。
-- **禁止过度治疗**: 如果文件没有明显问题，不要为了"优化"而随意修改。
-- **禁止越界治疗**: 严禁修改 `.trae/rules/modules` 以外的文件（如项目源码、配置文件、Skill定义文件等）。
-- **禁止手动重命名**: 所有文件重命名操作必须通过 `treatment.py` 脚本执行，确保操作可追溯。
+- **禁止过度治疗**: 如果文件内容清晰且短小，不要为了"优化"而随意修改。
+- **禁止越界治疗**: 严禁修改 `.trae/rules/modules` 以外的文件。
+- **禁止使用 `DeleteFile` 工具操作规则文件**: 任何废弃、合并后的旧文件，都必须使用 `treatment.py` 的 `delete` 动作进行**软删除 (移入回收站)**，严禁硬删除。
 
 ## 标准作业程序 (SOP)
 
 ### 1. 预检分诊 (Triage)
+调用体检仪脚本生成诊断报告：
+`python .trae/skills/knowledge-doctor/scripts/scanner.py --full`
+> 根据报告中的 warnings 和 criticals，确定需要治疗的目标文件（如 oversized 或重复文件）。
 
-Agent 调用 `scanner.py` 获取诊断报告。
-
-- **默认模式 (增量)**: `python .trae/skills/knowledge-doctor/scripts/scanner.py`
-- **专家模式 (全量)**: `python .trae/skills/knowledge-doctor/scripts/scanner.py --target modules --full`
-
-**报告分析**:
-
-- `critical`: 格式错误，必须立即修复。
-- `warning`: 规模过大或潜在冲突，按需处理。
-
-### 2. 制定治疗方案 (Treatment Planning)
-
-根据报告类型，生成 JSON 格式的治疗计划（Treatment Plan）。
+### 2. 生成并执行治疗方案 (Execute Treatment)
+根据诊断结果，生成 JSON 格式的治疗计划，并调用 `treatment.py` 执行。
 
 **Plan JSON 示例**:
-
 ```json
 [
   {
@@ -65,79 +46,35 @@ Agent 调用 `scanner.py` 获取诊断报告。
   },
   {
     "action": "delete",
-    "target": ".trae/rules/modules/ui/old_button_guide.md"
+    "target": ".trae/rules/modules/ui/old_button.md"
   }
 ]
 ```
 
 **治疗类型**:
 
-#### A. 格式修复 (Format Fix)
+#### A. 结构裂变 (Fission) - **最优先**
+*症状*: `scanner.py` 报告文件行数超过 300 行 (oversized)，且包含多个不相关的主题。
 
-*症状*: 文件缺少 Frontmatter，或未使用 TypeScript Interface。
 *动作*:
+1.  **Extract**: 提取并整理出特定主题的 Markdown 内容，写入临时文件（如 `.trae/temp/split_a.md`）。
+2.  **Create**: 构造 Plan JSON，将临时文件写入到新路径（参考 `scanner.py` 头部的拆分命名策略，不需要你手动决定文件名格式，只要确保逻辑分离即可）。
+3.  **Refactor/Delete**: 将原文件重写为一个索引 (Index) 文件，或者构造 `delete` 动作软删除原文件。
 
-1. 读取文件。
-2. 使用 `knowledge-librarian` 的 `new_module.md` 模板进行重写。
-3. **Plan Action**: `"rewrite"` (target: 原文件, content\_file: 重写后的临时文件)
+#### B. 去重手术 (Deduplication)
+*症状*: 发现两个文件内容高度重叠。
+*动作*:
+1.  **Merge**: 将废弃文件中的价值点整合，写入临时文件 `.trae/temp/merged.md`。
+2.  **Plan**: 构造 Plan JSON，包含对保留文件的 `update`/`rewrite`，以及对废弃文件的 `delete`。
+3.  **Execute**: 执行 `treatment.py`。这是**静默软删除**，安全且无需用户确认。
 
-#### B. 真相查证 (Fact Check)
-
+#### C. 真相查证 (Fact Check)
 *症状*: 包含 `TODO`, `FIXME`, `?` 标记，或内容存疑。
 *动作*:
+1.  **Search**: 使用 `WebSearch` 搜索关键词查证。
+2.  **Fix**: 直接使用 `SearchReplace` 或通过 Plan JSON 修正错误，并添加 `<!-- Verified: YYYY-MM-DD -->` 注释。
 
-1. **Search**: 使用 `WebSearch` 搜索关键词。
-2. **Verify**: 对比文档内容与搜索结果。
-3. **Fix**: 修正错误，并在修改处添加 `<!-- Verified: YYYY-MM-DD -->` 注释。
-4. **Plan Action**: `"rewrite"`
-
-#### C. 去重手术 (Deduplication)
-
-*症状*: 两个文件内容高度重叠。
-*动作*:
-
-1. **Analyze**: 确定保留哪个文件。
-2. **Merge**: 将被废弃文件中的独特价值点合并到保留文件中。
-3. **Plan Action**:
-   - 对保留文件执行 `"rewrite"` (合并后内容)
-   - 对废弃文件执行 `"delete"`
-
-#### D. 结构裂变 (Fission)
-
-*症状*: 文件行数 > 300 行。
-*动作*:
-
-1. **Plan**: 提出拆分方案。
-2. **Split**: 创建新的子文件。
-3. **命名规则**: 拆分后的文件（除 index 外）必须包含原大文件的文件名作为前缀。
-   - 原文件: `123.ts.md`
-   - 拆分后:
-     - `123-main-feature.ts.md`（核心功能）
-     - `123-sub-feature-a.ts.md`（子功能A）
-     - `123-sub-feature-b.ts.md`（子功能B）
-     - `index.ts.md`（索引文件）
-4. **Plan Action**:
-   - `"create"` (target: 新子文件)
-   - `"rewrite"` (target: 原文件或 Index 文件)
-   - `"delete"` (target: 原大文件，如果已完全拆分)
-
-#### E. 命名规范修复 (Naming Convention Fix)
-
-*症状*: 拆分文件不符合命名规则（缺少原文件名前缀）。
-*动作*:
-
-1. **Analyze**: 分析文件命名问题，确定原文件和正确的命名格式。
-2. **Rename**: 按照命名规则重命名文件。
-3. **Plan Action**:
-   - `"rename"` (old\_path: 原文件路径, target: 新文件路径)
-
-### 3. 执行治疗 (Execute Treatment)
-
-执行生成的计划文件。
-
-- **命令**: `python .trae/skills/knowledge-doctor/scripts/treatment.py --plan .trae/temp/treatment_plan.json`
-- **机制**: 脚本会自动备份被修改的文件，并将被删除的文件移动到 `.trae/trash/`（静默删除）。
-
-### 4. 康复复查 (Post-Check)
-
-治疗完成后，再次运行 `scanner.py` 确认相关文件的警告已消除。
+### 3. 康复复查 (Post-Check)
+治疗脚本执行完成后，再次运行 `scanner.py` 确认相关文件的警告是否消除。
+- 如果消除，向用户报告最终结果（软删除了哪些文件，创建了哪些文件）。
+- 如果未消除，继续修正。

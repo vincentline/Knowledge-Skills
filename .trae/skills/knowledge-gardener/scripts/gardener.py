@@ -236,8 +236,8 @@ def command_new(args):
         final_file_content = content
     else:
         # 模板模式: 添加标准头部
-        # 格式: 标题 + 标签 + 创建日期 + 正文
-        final_file_content = f"# {title}\n> Tags: {tags}\n> Created: {datetime.datetime.now().strftime('%Y-%m-%d')}\n\n{content}"
+        # 格式: 标题 + 标签 + 创建时间 + 正文
+        final_file_content = f"# {title}\n> Tags: {tags}\n> Created: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n{content}"
 
     # ========================================
     # 步骤 3: 生成文件名
